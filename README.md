@@ -114,12 +114,6 @@ This project is a web-based application for uploading CSV files, analyzing data,
 
 ---
 
-## License
-
-This project is open-source and available under the [MIT License](LICENSE). 
-
----
-
 ## Contributing
 
 1. Fork the repository.

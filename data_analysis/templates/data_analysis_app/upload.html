@@ -1,184 +1,271 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Data Analysis App</title>
     <link
-      rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
     />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        background-color: #f4f7fc;
+        font-family: 'Arial', sans-serif;
+      }
+      .container {
+        max-width: 1200px;
+      }
+      .form-control,
+      .form-select {
+        border-radius: 10px;
+      }
+      h1, h2, h3 {
+        font-family: 'Arial', sans-serif;
+      }
+      /* Header styling */
+      .header {
+        background: linear-gradient(90deg, rgba(0, 123, 255, 1) 0%, rgba(0, 196, 255, 1) 100%);
+        color: white;
+        padding: 50px 0; /* Increased top/bottom padding */
+        margin-bottom: 50px; /* Increased space from the top */
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+      }
+      .header h1 {
+        font-size: 2.5rem;
+        font-weight: 600;
+      }
+      .card {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+        background-color: white;
+      }
+      .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        border-radius: 50px;
+      }
+      .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+      }
+      /* Scrollable table */
+      .table-responsive {
+        margin-top: 20px;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .table-scroll {
+        max-height: 400px; /* Set your preferred max-height */
+        overflow-x: auto; /* Horizontal scroll */
+        overflow-y: auto; /* Vertical scroll */
+        display: block;
+        width: 100%; /* Ensure table takes up full width */
+      }
+      .alert-warning {
+        border-radius: 10px;
+      }
+      .row > .col-md-6 {
+        margin-bottom: 15px;
+      }
+      .mb-5 {
+        margin-bottom: 30px !important;
+      }
+      .mt-5 {
+        margin-top: 40px !important;
+      }
+      .btn-lg {
+        padding: 12px 20px;
+        font-size: 1.2rem;
+      }
+      /* Customized button hover effect */
+      .btn-primary:hover {
+        transform: scale(1.05);
+        transition: all 0.3s ease;
+      }
+    </style>
   </head>
   <body>
     <div class="container mt-5">
-      <h1 class="text-center">Upload CSV for Analysis</h1>
-      <form method="post" enctype="multipart/form-data" class="my-4">
-        {% csrf_token %} {{ form.as_p }}
-        <div class="mb-3">
-          <label for="chunksize" class="form-label"
-            >Data Visualization Chunk Size</label
-          >
-          <input
-            type="number"
-            id="chunksize"
-            name="chunksize"
-            class="form-control"
-            min="1"
-            step="1"
-            value="100"
-          />
-          <small
-            id="chunksizeWarning"
-            class="form-text text-danger"
-            style="display: none"
-          >
-            Warning: Chunk size greater than 1000 may cause slower loading
-            times.
-          </small>
-        </div>
-        <button type="submit" class="btn btn-primary">Upload</button>
-      </form>
+      <!-- Attractive Header -->
+      <div class="header text-center">
+        <h1>Upload CSV for Data Analysis</h1>
+        <p class="lead">Visualize and analyze your data with ease</p>
+      </div>
 
+      <!-- Form to upload data -->
+      <div class="card">
+        <form method="post" enctype="multipart/form-data" class="my-4">
+          {% csrf_token %}
+          {{ form.as_p }}
+          
+          <div class="mb-3">
+            <label for="chunksize" class="form-label">Data Visualization Chunk Size</label>
+            <input
+              type="number"
+              id="chunksize"
+              name="chunksize"
+              class="form-control"
+              min="1"
+              step="1"
+              value="100"
+            />
+            <small
+              id="chunksizeWarning"
+              class="form-text text-warning"
+              style="display: none"
+            >
+              Warning: Chunk size greater than 1000 may cause slower loading times.
+            </small>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg w-100">
+            Upload Data
+          </button>
+        </form>
+      </div>
+
+      <!-- Results section -->
       {% if results %}
-      <div class="mt-4">
-        <h2 class="text-center">Analysis Results</h2>
+        <div class="card mt-5">
+          <h2 class="text-center text-primary mb-4">Analysis Results</h2>
 
-        <h3>First Few Rows</h3>
-        <div class="table-responsive">{{ results.head|safe }}</div>
+          <h3>First Few Rows</h3>
+          <div class="table-responsive table-scroll">
+            {{ results.head|safe }}
+          </div>
 
-        <h3>Summary Statistics</h3>
-        <div class="table-responsive">{{ results.summary|safe }}</div>
+          <h3>Summary Statistics</h3>
+          <div class="table-responsive table-scroll">
+            {{ results.summary|safe }}
+          </div>
 
-        <h3>Missing Values</h3>
-        <div class="table-responsive">{{ results.missing|safe }}</div>
+          <h3>Missing Values</h3>
+          <div class="table-responsive table-scroll">
+            {{ results.missing|safe }}
+          </div>
 
-        <h3>Visualizations</h3>
+          <h3>Visualizations</h3>
 
-        <!-- Dropdown to select the column -->
-        <div class="mb-3">
-          <label for="columnSelect" class="form-label"
-            >Select a x-axis Column for the Chart</label
+          <!-- Dropdowns for selecting chart columns -->
+          <div class="row">
+            <div class="col-md-6">
+              <label for="columnSelect" class="form-label">
+                Select x-axis Column for Chart
+              </label>
+              <select id="columnSelect" class="form-select">
+                {% for column in results.columns %}
+                  <option value="{{ column }}">{{ column }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label for="columnSelect_y" class="form-label">
+                Select y-axis Column for Chart
+              </label>
+              <select id="columnSelect_y" class="form-select">
+                {% for column in results.columns %}
+                  <option value="{{ column }}">{{ column }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <!-- Chart type selection -->
+          <div class="mb-3">
+            <label for="chart_type" class="form-label">Select Chart Type</label>
+            <select id="chart_type" class="form-select">
+              <option value="line">Line</option>
+              <option value="bar">Bar</option>
+              <option value="scatter">Scatter</option>
+              <option value="bubble">Bubble</option>
+              <option value="doughnut">Doughnut</option>
+              <option value="radar">Radar</option>
+              <option value="pie">Pie</option>
+            </select>
+          </div>
+
+          <button
+            id="generateChartBtn"
+            class="btn btn-primary btn-lg w-100 mb-3"
           >
-          <select id="columnSelect" class="form-control">
-            {% for column in results.columns %}
-            <option value="{{ column }}">{{ column }}</option>
-            {% endfor %}
-          </select>
-        </div>
+            Generate Chart
+          </button>
 
-        <div class="mb-3">
-          <label for="columnSelect_y" class="form-label"
-            >Select a y-axis Column for the Chart</label
-          >
-          <select id="columnSelect_y" class="form-control">
-            {% for column in results.columns %}
-            <option value="{{ column }}">{{ column }}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <div class="mb-3">
-          <label for="chart_type" class="form-label"
-            >Select the Chart Type</label
-          >
-          <select id="chart_type" class="form-control">
-            <option value="line">Line</option>
-            <option value="bar">Bar</option>
-            <option value="scatter">Scatter</option>
-            <option value="bubble">Bubble</option>
-            <option value="doughnut">Doughnut</option>
-            <option value="radar">Radar</option>
-            <option value="pie">Pie</option>
-          </select>
-        </div>
-
-        <!-- Button to generate the chart -->
-        <button id="generateChartBtn" class="btn btn-primary mb-3">
-          Generate Chart
-        </button>
-
-        <!-- Canvas to render the chart -->
-        <div class="row">
-          <div class="col-12">
-            <canvas id="chartCanvas"></canvas>
+          <!-- Canvas to render the chart -->
+          <div class="row">
+            <div class="col-12">
+              <canvas id="chartCanvas"></canvas>
+            </div>
           </div>
         </div>
+      {% endif %}
+    </div>
 
-        <script>
-          let chartInstance = null;
-          let chartsData = {{ results.charts_data|safe }};
-          const ctx = document.getElementById('chartCanvas').getContext('2d');
+    <script>
+      let chartInstance = null;
+      let chartsData = {{ results.charts_data|safe }};
+      const ctx = document.getElementById('chartCanvas').getContext('2d');
 
-          // Function to generate the chart
-          function generateChart(xColumn, yColumn) {
-              const chart_type = document.getElementById('chart_type').value;
+      function generateChart(xColumn, yColumn) {
+          const chart_type = document.getElementById('chart_type').value;
 
-              // Find the relevant chart data for the selected y-axis column
-              const selectedChartData_y = chartsData.find(data => data.label === yColumn);
-              const selectedChartData_x = chartsData.find(data => data.label === xColumn);
+          const selectedChartData_y = chartsData.find(data => data.label === yColumn);
+          const selectedChartData_x = chartsData.find(data => data.label === xColumn);
 
-              console.log("y",selectedChartData_y)
-              console.log("X",selectedChartData_x)
+          if (!selectedChartData_x || !selectedChartData_y) return;
 
-              if (!selectedChartData_x || !selectedChartData_y) return; // Exit if no data found for the selected column
+          const xData = selectedChartData_x.y_data || [];
+          const yData = selectedChartData_y.y_data || [];
 
-              const xData = selectedChartData_x.y_data || [];  // Get x_data (index or selected x-axis column)
-              const yData = selectedChartData_y.y_data || [];  // Get y_data for the selected column
+          if (chartInstance) {
+              chartInstance.destroy();
+          }
 
-              console.log("xData",xData)
-              console.log("yData",yData)
-
-
-              // Destroy previous chart instance (if any)
-              if (chartInstance) {
-                  chartInstance.destroy();
-              }
-
-              // Create a new chart
-              chartInstance = new Chart(ctx, {
-                  type: chart_type, // Chart type from dropdown
-                  data: {
-                      labels: xData, // Set x-axis labels
-                      datasets: [{
-                          label: yColumn, // Label for the dataset
-                          data: yData, // Data points for the y-axis
-                          borderColor: 'rgba(75, 192, 192, 1)',
-                          borderWidth: 2,
-                          fill: false
-                      }]
-                  },
-                  options: {
-                      responsive: true,
-                      scales: {
-                          x: {
-                              title: {
-                                  display: true,
-                                  text: xColumn || 'Index' // Default x-axis title
-                              }
-                          },
-                          y: {
-                              title: {
-                                  display: true,
-                                  text: yColumn
-                              }
+          chartInstance = new Chart(ctx, {
+              type: chart_type,
+              data: {
+                  labels: xData,
+                  datasets: [{
+                      label: yColumn,
+                      data: yData,
+                      borderColor: 'rgba(75, 192, 192, 1)',
+                      borderWidth: 2,
+                      fill: false
+                  }]
+              },
+              options: {
+                  responsive: true,
+                  scales: {
+                      x: {
+                          title: {
+                              display: true,
+                              text: xColumn || 'Index'
+                          }
+                      },
+                      y: {
+                          title: {
+                              display: true,
+                              text: yColumn
                           }
                       }
                   }
-              });
-          }
-
-          // Attach event listener to the "Generate Chart" button
-          document.getElementById('generateChartBtn').addEventListener('click', function() {
-              const xColumn = document.getElementById('columnSelect').value;
-              const yColumn = document.getElementById('columnSelect_y').value;
-              generateChart(xColumn, yColumn);
+              }
           });
+      }
 
-          // Initialize the chart with the first column (or default column)
-          const initialYColumn = document.getElementById('columnSelect_y').value;
-          generateChart(null, initialYColumn); // Use index as default x-axis
-        </script>
-      </div>
-      {% endif %}
-    </div>
+      document.getElementById('generateChartBtn').addEventListener('click', function() {
+          const xColumn = document.getElementById('columnSelect').value;
+          const yColumn = document.getElementById('columnSelect_y').value;
+          generateChart(xColumn, yColumn);
+      });
+
+      const initialYColumn = document.getElementById('columnSelect_y').value;
+      generateChart(null, initialYColumn);
+    </script>
   </body>
 </html>
